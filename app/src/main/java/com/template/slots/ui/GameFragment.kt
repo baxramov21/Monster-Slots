@@ -1,38 +1,57 @@
 package com.template.slots.ui
 
-import android.os.Build
 import android.os.Bundle
+import android.provider.UserDictionary.Words.FREQUENCY
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.Window
-import androidx.core.content.ContextCompat
+import android.widget.Adapter
+import android.widget.ImageView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.LayoutManager
 import com.template.slots.R
-import com.template.slots.R.*
+import com.template.slots.databinding.FragmentGameBinding
+import com.template.slots.ui.adapter.SlotItem
+import com.template.slots.ui.adapter.SlotsAdapter
+import com.template.slots.ui.view_model.MainViewModel
+import com.template.slots.ui.view_model.MyViewModelFactory
+import kotlinx.coroutines.*
 
-
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [GameFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class GameFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
+    private val viewModelFactory by lazy {
+        MyViewModelFactory(requireActivity().application)
+    }
+
+    private val viewModel by lazy {
+        ViewModelProvider(this, viewModelFactory)[MainViewModel::class.java]
+    }
+
+    private var _binding: FragmentGameBinding? = null
+    private val binding: FragmentGameBinding
+        get() = _binding ?: throw NullPointerException("FragmentGameBinding is null")
+
+    private val imageViews: ArrayList<ImageView> by lazy {
+        val list: ArrayList<ImageView>
+        with(binding.slotsTable) {
+            list = arrayListOf(
+                image1,
+                image2,
+                image3,
+                image4,
+                image5,
+                image6,
+                image7,
+                image8,
+                image9,
+            )
         }
+        list
     }
 
     private fun onBackPressed() {
@@ -46,28 +65,148 @@ class GameFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(layout.fragment_game, container, false)
+    ): View {
+        _binding = FragmentGameBinding.inflate(layoutInflater)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        binding.textViewDeposit.text = "000 ${viewModel.getDeposit()}"
+        binding.betAmount.text = "${viewModel.getBet()}"
+
+        onSimpleSpinClicked()
+        observeSlotsListChanges()
+        onBetChanged()
+        onAutoClickListener()
+    }
+
+    private fun onSimpleSpinClicked() {
+        binding.btnSpin.setOnClickListener {
+            disableStartGameButtons()
+            with(binding) {
+                textViewDeposit.text = "000${(viewModel.getDeposit() - viewModel.getBet())}"
+            }
+            viewModel.startGame(SLOTS_LIST)
+        }
+    }
+
+    private fun onAutoClickListener() {
+        binding.btnAutoSpin.setOnClickListener {
+//            val deposit = viewModel.getDeposit()
+//            val bet = viewModel.getBet()
+//            while (deposit >= bet) {
+//                disableStartGameButtons()
+//                viewModel.startGame(SLOTS_LIST)
+//            }
+//            if (deposit < bet) {
+//                requireActivity().supportFragmentManager.beginTransaction()
+//                    .replace(R.id.main_container, GameFinishedFragment.newInstance())
+//                    .commit()
+//            }
+
+            disableStartGameButtons()
+            with(binding) {
+                textViewDeposit.text = "000${(viewModel.getDeposit() - viewModel.getBet())}"
+            }
+            viewModel.startGame(SLOTS_LIST)
+        }
+    }
+
+    private fun disableStartGameButtons() {
+        binding.btnSpin.isEnabled = false
+        binding.btnAutoSpin.isEnabled = false
+    }
+
+    private fun enableStartGameButtons() {
+        binding.btnSpin.isEnabled = true
+        binding.btnAutoSpin.isEnabled = true
+    }
+
+    private fun observeSlotsListChanges() {
+        viewModel.imageList.observe(viewLifecycleOwner) {
+            generateSlotsTable(it)
+        }
+
+        viewModel.gameFinished.observe(viewLifecycleOwner) {
+            if (it) {
+                var deposit = viewModel.getDeposit()
+                val bet = viewModel.getBet()
+                deposit -= bet
+                deposit += viewModel.getReward(bet)
+                binding.textViewDeposit.text = "000$deposit"
+                viewModel.setDeposit(deposit)
+                viewModel.setBet(bet)
+                enableStartGameButtons()
+            }
+        }
+    }
+
+    private fun onBetChanged() {
+        var bet = viewModel.getBet()
+        val deposit = viewModel.getDeposit()
+        binding.decreaseBet.setOnClickListener {
+            if (bet > 1) {
+                bet--
+                binding.betAmount.text = "$bet"
+                viewModel.setBet(bet)
+            } else {
+                Toast.makeText(
+                    context,
+                    "You can't decrease the value more than this",
+                    Toast.LENGTH_SHORT
+                )
+                    .show()
+            }
+        }
+
+        binding.increaseBet.setOnClickListener {
+            if (deposit >= bet) {
+                bet++
+                viewModel.setBet(bet)
+                binding.betAmount.text = "$bet"
+            } else {
+                Toast.makeText(context, "You don't have enough resources", Toast.LENGTH_SHORT)
+                    .show()
+
+                requireActivity().supportFragmentManager.beginTransaction()
+                    .replace(R.id.main_container, GameFinishedFragment.newInstance())
+                    .commit()
+            }
+        }
+    }
+
+    private fun generateSlotsTable(imageIds: List<Int>) {
+        for (position in 0 until imageViews.size) {
+            imageViews[position].setImageResource(imageIds[position])
+        }
+    }
+
+    override fun onDestroy() {
+        if (_binding != null) {
+            _binding = null
+        }
+        super.onDestroy()
     }
 
     companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment GameFragment.
-         */
-        // TODO: Rename and change types and number of parameters
         @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            GameFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
+        fun newInstance() = GameFragment()
+
+        val SLOTS_LIST = listOf<Int>(
+            R.drawable.ico_1,
+            R.drawable.ico_2,
+            R.drawable.ico_3,
+            R.drawable.ico_4,
+            R.drawable.ico_5,
+            R.drawable.ico_6,
+            R.drawable.ico_7,
+            R.drawable.ico_8,
+            R.drawable.ico_1
+        )
+
+        private const val SECONDS_IN_MILLISECONDS = 5000
+        private const val CHANGE_IMAGE_PERIOD_IN_MILLIS = 100
+        private const val FREQUENCY = SECONDS_IN_MILLISECONDS / CHANGE_IMAGE_PERIOD_IN_MILLIS
     }
 }

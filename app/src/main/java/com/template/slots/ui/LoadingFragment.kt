@@ -1,11 +1,15 @@
 package com.template.slots.ui
 
 import android.os.Bundle
+import android.os.CountDownTimer
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ProgressBar
 import com.template.slots.R
+import com.template.slots.ui.view_model.MainViewModel
+import kotlinx.coroutines.*
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -38,6 +42,30 @@ class LoadingFragment : Fragment() {
         return inflater.inflate(R.layout.fragment_loading, container, false)
     }
 
+    override fun onStart() {
+        super.onStart()
+        var progress = 0
+        val progressBar = requireActivity().findViewById<ProgressBar>(R.id.progressBar)
+
+        val timer = object : CountDownTimer(
+            5 * 1000,
+            200
+        ) {
+            override fun onTick(p0: Long) {
+                progress += 7
+                progressBar.progress = progress
+            }
+
+            override fun onFinish() {
+                requireActivity().supportFragmentManager
+                    .beginTransaction()
+                    .replace(R.id.main_container, GameFragment.newInstance())
+                    .commit()
+            }
+        }
+        timer.start()
+    }
+
     companion object {
         /**
          * Use this factory method to create a new instance of
@@ -49,12 +77,6 @@ class LoadingFragment : Fragment() {
          */
         // TODO: Rename and change types and number of parameters
         @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            LoadingFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
+        fun newInstance() = LoadingFragment()
     }
 }

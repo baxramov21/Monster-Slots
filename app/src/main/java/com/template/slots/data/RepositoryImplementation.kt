@@ -1,34 +1,39 @@
 package com.template.slots.data
 
 import android.app.Application
+import androidx.lifecycle.MutableLiveData
 import com.template.slots.data.db.PreferenceHelper
 import com.template.slots.domain.Repository
 import kotlin.random.Random
 
+typealias slotsRandomizing = (List<Int>, Int) -> Unit
+
 class RepositoryImplementation(private val application: Application) : Repository {
 
     private val db = PreferenceHelper
+    private val _randomSlots: MutableLiveData<List<Int>>? = null
+    val randomSlots by lazy {
+        _randomSlots ?: throw NullPointerException("_randomSlots is null")
+    }
 
     override fun autoSpin(
-        deposit: Int,
+        win: Boolean,
         bet: Int,
-        slotSpin: (slotsRow: MutableList<Int>) -> MutableList<Int>
+        slotSpin: (slotsRow: List<Int>, frequency: Int) -> Unit
     ): Int {
-        val win = generateWin()
-        return generateReward(deposit, win)
+        return generateReward(bet, win)
     }
 
     override fun simpleSpin(
-        deposit: Int,
+        win: Boolean,
         bet: Int,
-        slotSpin: (slotsRow: MutableList<Int>) -> MutableList<Int>
+        slotSpin: () -> Unit
     ): Int {
-        val win = generateWin()
-        return generateReward(deposit, win)
+        slotSpin()
+        return generateReward(bet, win)
     }
 
-
-    override fun generateSlotSpin(slotsRow: MutableList<Int>): MutableList<Int> {
+    override fun generateSlotSpin(slotsRow: List<Int>, frequency: Int): List<Int> {
         val result = mutableListOf<Int>()
         for (position in slotsRow) {
             result.add(slotsRow.random())

@@ -2,10 +2,10 @@ package com.template.slots.domain
 
 class AutoSpin(private val repository: Repository) {
     operator fun invoke(
-        deposit: Int,
+        win: Boolean,
         bet: Int,
-        slotSpin: (slotsRow: MutableList<Int>) -> MutableList<Int>
+        slotSpin: (slotsRow: List<Int>, frequency: Int) -> Unit
     ): Int {
-        return repository.autoSpin(deposit, bet, slotSpin)
+        return repository.autoSpin(win, bet, slotSpin)
     }
 }
