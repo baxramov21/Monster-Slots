@@ -30,7 +30,7 @@
         app:layout_constraintGuide_percent="0.9" />
 
     <ImageView
-        android:id="@+id/imageButtonSpin"
+        android:id="@+id/btnSpin"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:contentDescription="@string/spin_the_slots_one_time"
@@ -39,7 +39,7 @@
         app:layout_constraintStart_toStartOf="@id/guidelineButtonsStart" />
 
     <ImageView
-        android:id="@+id/imageButtonAutoSpin"
+        android:id="@+id/btnAutoSpin"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:contentDescription="@string/spin_slots_automatically_until_money_will_be_over"
@@ -89,6 +89,7 @@
         app:layout_constraintTop_toTopOf="@id/guidelineBetBarTop">
 
         <ImageButton
+            android:id="@+id/decreaseBet"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -96,16 +97,19 @@
             android:src="@drawable/button_minus" />
 
         <TextView
+            android:id="@+id/betAmount"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_weight="1"
             android:gravity="center"
             android:textColor="@color/white"
-            android:textSize="36sp"
+            android:textSize="32sp"
+            android:textStyle="bold"
             tools:text="77" />
 
         <ImageButton
+            android:id="@+id/increaseBet"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -113,37 +117,91 @@
             android:src="@drawable/button_plus" />
     </LinearLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
+    <FrameLayout
+        android:id="@+id/rvcItems"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="20dp"
         android:layout_marginBottom="20dp"
-        android:padding="12dp"
-        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-        app:layout_constraintBottom_toTopOf="@id/imageButtonAutoSpin"
+        app:layout_constraintBottom_toTopOf="@id/btnAutoSpin"
         app:layout_constraintEnd_toEndOf="@id/guidelineButtonsEnd"
         app:layout_constraintStart_toStartOf="@id/guidelineButtonsStart"
-        app:layout_constraintTop_toBottomOf="@id/textView"
-        tools:listitem="@layout/rcv_item" />
+        app:layout_constraintTop_toBottomOf="@id/textViewDeposit">
+
+        <include
+            android:id="@+id/slots_table"
+            layout="@layout/table"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+    </FrameLayout>
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/textViewDeposit"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="@drawable/money_background"
         android:gravity="center"
         android:textColor="@color/white"
         android:textSize="24sp"
-        android:textStyle="bold|italic"
-        app:layout_constraintBottom_toBottomOf="@id/guideline2"
+        app:layout_constraintBottom_toBottomOf="@id/guidelineRecyclerViewTop"
         app:layout_constraintEnd_toEndOf="@id/guidelineButtonsEnd"
-        tools:text="00001000" />
+        tools:text="000100" />
 
     <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline2"
+        android:id="@+id/guidelineRecyclerViewTop"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         app:layout_constraintGuide_percent="0.1" />
+
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guidelineBorderTop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.3" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guidelineBorderBottom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.46" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guidelineBorderStart"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.05" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guidelineBorderEnd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.95" />
+
+    <ImageView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:adjustViewBounds="true"
+        android:src="@drawable/ramka_pole"
+        app:layout_constraintBottom_toBottomOf="@id/guidelineBorderBottom"
+        app:layout_constraintEnd_toEndOf="@id/guidelineBorderEnd"
+        app:layout_constraintStart_toStartOf="@id/guidelineBorderStart"
+        app:layout_constraintTop_toTopOf="@id/guidelineBorderTop" />
+
+    <ImageView
+        android:id="@+id/imageViewBack"
+        app:layout_constraintTop_toTopOf="@id/textViewDeposit"
+        app:layout_constraintStart_toStartOf="@id/guidelineButtonsStart"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="@id/guidelineRecyclerViewTop"
+        android:src="@drawable/button_back" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

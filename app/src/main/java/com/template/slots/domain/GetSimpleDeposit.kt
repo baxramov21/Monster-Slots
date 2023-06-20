@@ -1,5 +1,5 @@
 package com.template.slots.domain
 
-class GetDeposit(private val repository: Repository) {
+class GetSimpleDeposit(private val repository: Repository) {
     operator fun invoke() = repository.getDeposit()
 }

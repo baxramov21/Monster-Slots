@@ -10,4 +10,7 @@
     <string name="spin_slots_automatically_until_money_will_be_over">Spin slots automatically until money will be over</string>
     <string name="back">Back</string>
     <string name="slots_list_element">Slots list element</string>
+    <string name="button_replay_the_game">Button replay the game</string>
+    <string name="game_over">Game over</string>
+    <string name="no_enough_coins">You don\'t have enough coins to bet, please check the bet amount</string>
 </resources>
