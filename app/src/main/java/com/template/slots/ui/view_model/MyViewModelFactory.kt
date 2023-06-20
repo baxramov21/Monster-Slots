@@ -6,7 +6,9 @@ import androidx.lifecycle.ViewModelProvider
 
 class MyViewModelFactory(private val application: Application) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        return modelClass.getConstructor(Application::class.java)
-            .newInstance(application)
+        if (modelClass.isAssignableFrom(MainViewModel::class.java)) {
+            return MainViewModel(application) as T
+        }
+        throw IllegalArgumentException("modelClass is different type. Required MainViewModel")
     }
 }
